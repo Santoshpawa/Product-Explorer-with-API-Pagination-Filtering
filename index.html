@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: rgb(157, 159, 160);
+            position: relative;
+            text-align: center;
+        }
+
+        #container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            justify-items: center;
+        }
+
+        #container>div {
+            width: 350px;
+            min-width: 200px;
+            height: 300px;
+            border: none;
+            box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+            padding: 10px;
+            justify-items: center;
+            background-color: white;
+        }
+
+        .title {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-height: 2.4em;
+            line-height: 1.2em;
+
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+        }
+
+        div>div>div {
+
+            height: 70%;
+            width: 80%;
+        }
+
+        #footer {
+
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+        }
+
+        #pageNumber {
+            position: fixed;
+            bottom: 0;
+            right: 15px;
+            font-weight: bold;
+            background-color: rgb(179, 126, 230);
+            padding: 5px;
+            border-radius: 4px;
+            color: white;
+        }
+
+        button {
+            font-weight: bold;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Product Display</h1>
+    <div id="sortandfilter">
+        <select name="" id="filter">
+            <option value="all">All</option>
+            <option value="men's-clothing">Men's Clothing</option>
+            <option value="women's-clothing">Women's Clothing</option>
+            <option value="jwellery">Jwellery</option>
+            <option value="electronics">Electronics</option>
+        </select>
+        <button id="filter-btn">Filter</button>
+        <select name="" id="sort">
+            <option value="none">None</option>
+            <option value="price">Price</option>
+            <option value="title">Title</option>
+        </select>
+        <button id="sort-btn">Sort</button>
+    </div>
+    <div id="container"></div>
+    <div id="footer">
+        <button id="previous-btn">Previous</button>
+        <button id="next-btn">Next</button>
+    </div>
+    <p id="pageNumber"></p>
+</body>
+
+</html>
+<script>
+    const container = document.getElementById('container');
+    const previousBtn = document.getElementById('previous-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const filterBtn = document.getElementById('filter-btn');
+    const sortBtn = document.getElementById('sort-btn');
+    let products = [];
+    let currentPage = localStorage.getItem('page') || 1;
+    const itemPerPage = 4;
+    // on windows loading
+
+    window.onload = async () => {
+        await fetchProducts();
+        displayProducts();
+    }
+
+    // fetching products
+
+    async function fetchProducts() {
+        try {
+            let response = await fetch('https://fakestoreapi.com/products');
+            products = await response.json();
+            console.log(products);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    // display products
+
+    function displayProducts() {
+
+        let start = (currentPage - 1) * 4;
+        let end = start + itemPerPage;
+
+        container.innerHTML = "";
+        let currentPageProducts = products.slice(start, end);
+        document.getElementById('pageNumber').innerText = `Page : ${currentPage}`;
+        currentPageProducts.forEach((item) => {
+            let div = document.createElement('div');
+            let imageWrapper = document.createElement('div');
+            let title = document.createElement('h4');
+            let price = document.createElement('h5');
+            let category = document.createElement('h5');
+            let image = document.createElement('img');
+            image.src = item.image;
+            title.innerText = item.title + ` (${item.category})`;
+            title.classList.add('title');
+            title.setAttribute('title', item.title + ` (${item.category})`)
+            price.innerText = `Price : $${item.price}`;
+            imageWrapper.append(image);
+            div.append(imageWrapper, title, price, category);
+            container.append(div);
+        })
+    }
+
+    // when previous button clicked
+    previousBtn.addEventListener('click', () => {
+
+        if (currentPage == 1) {
+            alert('This is first Page');
+            return;
+        }
+        --currentPage;
+        localStorage.setItem('page', currentPage);
+        displayProducts();
+    })
+
+    // when next button clicked
+    nextBtn.addEventListener('click', () => {
+
+        if (currentPage == 5) {
+            alert('This is last Page');
+            return;
+        }
+        ++currentPage;
+        localStorage.setItem('page', currentPage);
+        displayProducts();
+    })
+
+    // filter button
+
+</script>
